@@ -1,0 +1,49 @@
+# Walkthrough — Option A (Priority 1: Extract Supervisor Router)
+
+## Summary of Changes
+
+Priority 1 has been implemented: all supervisor agent routing and fallback query parsing/formatting logic has been extracted from [`routes.py`](file:///d:/ksp-main%20%282%29/ksp-main/ksp-main/backend/routes.py) into a dedicated module [`supervisor_router.py`](file:///d:/ksp-main%20%282%29/ksp-main/ksp-main/backend/supervisor_router.py).
+
+### 1. Created [`backend/supervisor_router.py`](file:///d:/ksp-main%20%282%29/ksp-main/ksp-main/backend/supervisor_router.py)
+Extracted:
+- `SUPERVISOR_ROUTER_PROMPT`: The supervisor agent system prompt.
+- `AGENT_META`: Module-level constant defining all agent labels, icons, colors, and descriptions.
+- `supervisor_agent_router(query, history)`: Primary LLM-based router with explicit slash command routing, guardrail intercept, and intent heuristics fallback.
+- `fallback_local_query(user_query)`: Keyword/regex parser for SQLite fallback.
+- `fallback_format_answer(user_query, intent, rows, rag_results)`: Formatter for local database and RAG results.
+
+### 2. Refactored [`backend/routes.py`](file:///d:/ksp-main%20%282%29/ksp-main/ksp-main/backend/routes.py)
+- Replaced 302 lines of inline router and fallback code with clean imports:
+```python
+from supervisor_router import (
+    supervisor_agent_router,
+    fallback_local_query,
+    fallback_format_answer,
+    AGENT_META,
+    SUPERVISOR_ROUTER_PROMPT
+)
+```
+- Total lines in `routes.py` dropped from **1,521 to 1,219 lines**.
+
+---
+
+## Verification Results
+
+### Unit Tests
+```
+[Guardrail Agent] Off-topic query blocked: 'What is 1+1 and bake a cake'
+Explicit command test passed (\document)
+Guardrail test passed (Domain guardrail intercept)
+Pre-routing test passed (Zero FIR SOP)
+Fallback local query test passed (count, Murder, 2024)
+Fallback formatter test passed
+ALL SUPERVISOR ROUTER TESTS PASSED!
+```
+
+### Live HTTP Integration Test
+Executed live `POST /chat` request against the running Flask backend:
+- **Query**: `\analytics How many murder cases in 2024?`
+- **HTTP Status**: `200 OK`
+- **Agent Type**: `analytics_agent`
+- **Orchestrator Routing**: Successfully routed via `supervisor_router` with 0.95 confidence to `AnalyticsAgent`
+- **Model Used**: Zoho Catalyst QuickML GLM-4.7-Flash

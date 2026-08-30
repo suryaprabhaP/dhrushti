@@ -25,48 +25,42 @@ def run_build(label, cwd, cmd):
     if result.returncode != 0:
         print(f"[ERROR] Build failed for {label}")
         sys.exit(1)
-    print(f"[BUILD] {label} ✓ done")
+    print(f"[BUILD] {label} done")
 
 
 def build_frontends():
     main_frontend = os.path.join(ROOT, "ksp-main", "frontend")
-    agent_frontend = os.path.join(ROOT, "ksp_dhrushtii2-rohith-sV0.1analysis_agent")
+    agent_frontend = os.path.join(ROOT, "ksp-main", "backend", "ksp_dhrushtii2-rohith-sV0.1analysis_agent")
 
-    # Build ksp-main frontend
-    run_build("ksp-main frontend", main_frontend, "npm install && npm run build")
-
-    # Build analysis agent frontend (already has base: '/agent/' set in vite.config.js)
+    # 1. Build analysis agent frontend (already has base: '/agent/' set in vite.config.js)
     run_build("analysis agent frontend", agent_frontend, "npm install && npm run build")
 
-    print("\n[BUILD] All frontends built successfully ✓")
+    # 2. Copy agent build output to main frontend's public/agent folder
+    import shutil
+    agent_public_dir = os.path.join(main_frontend, "public", "agent")
+    print(f"\n[BUILD] Syncing agent assets to main frontend public/agent...")
+    if os.path.exists(agent_public_dir):
+        shutil.rmtree(agent_public_dir)
+    shutil.copytree(os.path.join(agent_frontend, "dist"), agent_public_dir)
+
+    # 3. Build ksp-main frontend (which packs the public/agent folder into dist/agent)
+    run_build("ksp-main frontend", main_frontend, "npm install && npm run build")
+
+    print("\n[BUILD] All frontends built and synced successfully")
 
 
 # ─── Server Runners ────────────────────────────────────────────────────────────
 
 def run_main_backend():
-    """Run ksp-main Flask backend on port 5000."""
+    """Run unified ksp-main Flask backend on port 5000."""
     backend_dir = os.path.join(ROOT, "ksp-main", "backend")
     env = os.environ.copy()
     env["PORT"] = "5000"
     env["PYTHONPATH"] = backend_dir
-    print("[SERVER] Starting ksp-main backend on port 5000...")
+    print("[SERVER] Starting unified KSP backend on port 5000...")
     subprocess.run(
-        [sys.executable, "app.py"],
+        [sys.executable, "main_server.py"],
         cwd=backend_dir,
-        env=env
-    )
-
-
-def run_agent_backend():
-    """Run analysis agent Flask backend on port 5001."""
-    agent_dir = os.path.join(ROOT, "ksp_dhrushtii2-rohith-sV0.1analysis_agent")
-    env = os.environ.copy()
-    env["PORT"] = "5001"
-    env["PYTHONPATH"] = agent_dir
-    print("[SERVER] Starting analysis agent backend on port 5001...")
-    subprocess.run(
-        [sys.executable, "server.py"],
-        cwd=agent_dir,
         env=env
     )
 
@@ -83,22 +77,17 @@ if __name__ == "__main__":
     else:
         print("[START] Pre-built dist/ folders found. Skipping build step.")
 
-    # Step 2: Start both servers in parallel threads
+    # Step 2: Start unified server in background thread
     t1 = threading.Thread(target=run_main_backend, daemon=True)
-    t2 = threading.Thread(target=run_agent_backend, daemon=True)
-
     t1.start()
-    time.sleep(2)  # Small delay so main backend starts first
-    t2.start()
 
-    print("\n[START] Both servers running:")
-    print("  → Main KSP Dashboard : http://0.0.0.0:5000")
-    print("  → Analysis Agent      : http://0.0.0.0:5001")
+    print("\n[START] Unified Server running:")
+    print("  -> Main KSP Dashboard : http://localhost:5000")
+    print("  -> Sentinel Chatbot    : http://localhost:5000/agent/")
     print("\nPress Ctrl+C to stop.\n")
 
     # Keep main thread alive
     try:
         t1.join()
-        t2.join()
     except KeyboardInterrupt:
-        print("\n[STOP] Shutting down servers.")
+        print("\n[STOP] Shutting down server.")

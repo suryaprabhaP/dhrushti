@@ -1,5 +1,28 @@
+# ==============================================================================
+# KSP Sentinel AI — Unified Backend Dependencies
+# Platform: Zoho Catalyst App Service / Python 3.11+
+# Install: pip install -r requirements.txt
+# ==============================================================================
+
+# Core Web Framework & WSGI
 Flask>=3.0.0
+Werkzeug>=3.0.0
+flask-cors>=4.0.0
+gunicorn>=21.2.0
+
+# HTTP & Networking
 requests>=2.32.0
+urllib3>=2.0.0
+
+# Environment & Configuration
 python-dotenv>=1.0.0
+
+# In-Memory Analytical SQL & Vector DB (used by agent_server / analysis agent)
+duckdb>=1.5.0
+
+# Tabular Data Processing
 pandas>=2.2.0
+openpyxl>=3.1.0
+
+# Document Processing
 pypdf>=4.0.0

@@ -8,6 +8,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    // Base path for production — served under /agent/ sub-path within main app
+    base: '/agent/',
     // Build output goes into dist/ — served by Flask or any static host
     build: {
       outDir: 'dist',

@@ -644,7 +644,7 @@ function DivisionDashboard({
       {/* Floating KSP DRISHTI Assistant Trigger */}
       <button
         className="floating-chatbot-trigger"
-        onClick={() => window.location.href = 'http://localhost:5174'}
+        onClick={() => window.location.href = '/agent/'}
         title="KSP DRISHTI Intelligence Assistant"
         aria-label="KSP DRISHTI Assistant"
       >

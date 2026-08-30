@@ -1,0 +1,5 @@
+# Agent sub-app: serve agent's own index.html for all /agent/* routes
+/agent/*  /agent/index.html  200
+
+# Main KSP dashboard SPA: fallback to root index.html for all other routes
+/*  /index.html  200

@@ -1,10 +1,15 @@
-# Proxy backend API requests for ksp-main to Render backend
-/api/*  https://dhrushti-main1-backend.onrender.com/api/:splat  200!
-/chat   https://dhrushti-main1-backend.onrender.com/chat  200!
-/upload https://dhrushti-main1-backend.onrender.com/upload  200!
+# Route chat, calendar, and health endpoints to the Node.js Express backend
+/api/chat      https://dhrushti-node-backend.onrender.com/api/chat  200!
+/chat          https://dhrushti-node-backend.onrender.com/chat  200!
+/api/calendar/* https://dhrushti-node-backend.onrender.com/api/calendar/:splat  200!
+/api/health    https://dhrushti-node-backend.onrender.com/api/health  200!
+
+# Route analytics and upload endpoints to the Python Flask backend
+/upload        https://dhrushti-main1-backend.onrender.com/upload  200!
+/api/*         https://dhrushti-main1-backend.onrender.com/api/:splat  200!
 
 # Agent sub-app: serve agent's own index.html for all /agent/* routes
-/agent/*  /agent/index.html  200
+/agent/*       /agent/index.html  200
 
 # Main KSP dashboard SPA: fallback to root index.html for all other routes
-/*  /index.html  200
+/*             /index.html  200

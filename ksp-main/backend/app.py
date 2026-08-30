@@ -52,7 +52,10 @@ def create_app():
     # 4. Root web landing route serving SPA Single Page Application
     @app.route('/', methods=['GET'])
     def home():
-        return render_template('index.html')
+        index_path = os.path.join(frontend_dist_path, 'index.html')
+        if os.path.exists(index_path):
+            return render_template('index.html')
+        return jsonify({"status": "healthy", "service": "KSP Sentinel Backend API"}), 200
 
     # 5. Global Exception Handlers
     @app.errorhandler(404)

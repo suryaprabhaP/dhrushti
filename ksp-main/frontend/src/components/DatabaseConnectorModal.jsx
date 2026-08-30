@@ -23,7 +23,7 @@ export default function DatabaseConnectorModal({ isOpen, onClose, onConnectSucce
         formData.append('file', selectedFile);
         formData.append('session_id', 'default_session');
 
-        const res = await fetch('http://127.0.0.1:5000/upload', {
+        const res = await fetch('/upload', {
           method: 'POST',
           body: formData
         });

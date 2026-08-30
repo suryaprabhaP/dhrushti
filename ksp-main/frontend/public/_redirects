@@ -1,3 +1,8 @@
+# Proxy backend API requests for ksp-main to Render backend
+/api/*  https://dhrushti-main1-backend.onrender.com/api/:splat  200!
+/chat   https://dhrushti-main1-backend.onrender.com/chat  200!
+/upload https://dhrushti-main1-backend.onrender.com/upload  200!
+
 # Agent sub-app: serve agent's own index.html for all /agent/* routes
 /agent/*  /agent/index.html  200
 
